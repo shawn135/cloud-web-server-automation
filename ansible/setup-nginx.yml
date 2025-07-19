@@ -1,0 +1,15 @@
+- name: Configure Web Server
+  hosts: web
+  become: yes
+
+  tasks:
+    - name: Install NGINX
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Deploy a test webpage
+      copy:
+        content: "<h1>Hello from Shawn's Automated Cloud Server!</h1>"
+        dest: /var/www/html/index.html
