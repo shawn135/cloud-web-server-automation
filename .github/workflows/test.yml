@@ -1,0 +1,16 @@
+name: Test Web Server Setup
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create config.ini
+        run: |
+          echo "DOMAIN=example.com" > config.ini
+          echo "PHP_VERSION=8.1" >> config.ini
+      - name: Run setup script
+        run: sudo bash setup.sh
+      - name: Validate setup
+        run: |
+          curl -s http://localhost/test.php | grep -q "PHP Version" || exit 1
