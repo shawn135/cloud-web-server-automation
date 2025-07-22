@@ -1,5 +1,3 @@
-# cloud-web-server-automation
-
 Cloud Web Server Automation
 This project automates the setup of a secure web server on an Ubuntu VM, installing Nginx, PHP, MySQL, SSL (via Let’s Encrypt), and firewall rules. It’s designed for reliability and modularity, with CI/CD integration for testing.
 Prerequisites
@@ -14,13 +12,10 @@ Usage
 Clone the repository:git clone https://github.com/shawn135/cloud-web-server-automation.git
 cd cloud-web-server-automation
 
-
 Create config.ini with your settings:DOMAIN=example.com
 PHP_VERSION=8.1
 
-
 Run the script:sudo bash setup.sh
-
 
 Verify setup by accessing http://<your-domain>/test.php.
 
