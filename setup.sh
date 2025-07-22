@@ -28,4 +28,10 @@ check_error "Failed to install Nginx"
 apt install -y php-fpm php-mysql mysql-server
 check_error "Failed to install PHP or MySQL"
 
+# Harden SSH
+log "Hardening SSH..."
+sed -i 's/#PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+systemctl restart sshd
+check_error "Failed to harden SSH"
+
 log "Setup completed successfully"
