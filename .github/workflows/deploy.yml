@@ -1,0 +1,23 @@
+name: Deploy Nginx with Ansible
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup SSH key
+      uses: webfactory/ssh-agent@v0.5.4
+      with:
+        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+    - name: Run Ansible Playbook
+      run: |
+        ansible-playbook -i "${{ secrets.EC2_HOST }}," ansible/setup-nginx.yml -u ubuntu --private-key ~/.ssh/id_rsa --ssh-extra-args "-o StrictHostKeyChecking=no"

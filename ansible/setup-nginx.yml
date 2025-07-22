@@ -1,5 +1,6 @@
-- name: Configure Web Server
-  hosts: web
+---
+- name: Configure Nginx on EC2
+  hosts: webservers
   become: yes
 
   tasks:
@@ -14,15 +15,25 @@
         state: present
       notify: Restart Nginx
 
-    - name: Deploy a test webpage
+    - name: Start Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Replace default index.html
       copy:
-        content: "<h1>Hello from Shawn's Automated Cloud Server!</h1>"
         dest: /var/www/html/index.html
+        content: |
+          <html>
+          <head><title>Deployed by Ansible</title></head>
+          <body><h1>Hello from Ansible Automation!</h1></body>
+          </html>
 
     - name: Harden SSH configuration
       lineinfile:
         path: /etc/ssh/sshd_config
-        regexp: '^#PermitRootLogin'
+        regexp: '^#?PermitRootLogin'
         line: 'PermitRootLogin no'
       notify: Restart SSH
 
@@ -31,6 +42,7 @@
       service:
         name: nginx
         state: restarted
+
     - name: Restart SSH
       service:
         name: sshd
