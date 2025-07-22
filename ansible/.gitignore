@@ -1,0 +1,11 @@
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+*.pem
+
+scripts/Advanced/
+scripts/App/
+scripts/Apps/
+scripts/venv/
+terraform/.terraform/
+cloud-web-server-automation/
