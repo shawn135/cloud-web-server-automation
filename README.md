@@ -37,3 +37,6 @@ Notes
 
 Logs are written to /var/log/web-server-setup.log.
 Ensure port 443 is open for SSL.
+
+lets go
+Triggering CI/CD pipeline
