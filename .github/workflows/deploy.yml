@@ -1,15 +1,12 @@
-name: Deploy Web Server
+name: Deploy to EC2
 
 on:
   push:
+    paths:
+      - setup.sh
+      - .github/workflows/deploy.yml
     branches:
       - main
-    paths:
-      - '**.yml'
-      - '**.sh'
-      - '**.php'
-      - '**.tf'
-      - '**.txt'
 
 jobs:
   deploy:
@@ -17,17 +14,17 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up SSH private key
+      - name: Set up SSH key from secret
         run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > shawn-key.pem
+          echo "${{ secrets.PRIVATE_KEY }}" > shawn-key.pem
           chmod 600 shawn-key.pem
+
+      - name: Copy setup script to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no -i shawn-key.pem setup.sh ubuntu@54.82.93.197:~/setup.sh
 
       - name: Run setup script on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i shawn-key.pem ubuntu@54.82.93.197 '
-            sudo bash -s' < setup.sh
-
-      - name: Confirm deployment finished
-        run: echo "✅ EC2 instance successfully configured via Ansible & setup.sh"
+          ssh -o StrictHostKeyChecking=no -i shawn-key.pem ubuntu@54.82.93.197 'chmod +x ~/setup.sh && sudo bash ~/setup.sh'
