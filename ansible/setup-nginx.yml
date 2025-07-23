@@ -48,10 +48,8 @@
         name: ssh
         state: restarted
 
-- name: Copy test PHP file to web root
+- name: Copy test.php to Nginx web root
   copy:
     src: test.php
     dest: /var/www/html/test.php
-    owner: www-data
-    group: www-data
     mode: '0644'
