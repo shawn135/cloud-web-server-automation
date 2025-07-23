@@ -30,6 +30,12 @@
           <body><h1>Hello from Ansible Automation!</h1></body>
           </html>
 
+    - name: Copy test.php to Nginx web root
+      copy:
+        src: test.php
+        dest: /var/www/html/test.php
+        mode: '0644'
+
     - name: Harden SSH configuration
       lineinfile:
         path: /etc/ssh/sshd_config
@@ -47,9 +53,3 @@
       service:
         name: ssh
         state: restarted
-
-- name: Copy test.php to Nginx web root
-  copy:
-    src: test.php
-    dest: /var/www/html/test.php
-    mode: '0644'
