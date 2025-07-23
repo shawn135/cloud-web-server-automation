@@ -1,42 +1,82 @@
-Cloud Web Server Automation
-This project automates the setup of a secure web server on an Ubuntu VM, installing Nginx, PHP, MySQL, SSL (via Let’s Encrypt), and firewall rules. It’s designed for reliability and modularity, with CI/CD integration for testing.
-Prerequisites
+# ☁️ Cloud Web Server Automation
 
-Ubuntu 20.04 or 22.04
-Root or sudo access
-Internet access for package downloads
-Domain name (for SSL setup)
+This project automates the deployment of a fully functional LAMP-style web server (Nginx, MySQL, PHP) on an AWS EC2 instance using **Terraform** and **Ansible**, with **GitHub Actions** providing full CI/CD integration.
 
-Usage
+---
 
-Clone the repository:git clone https://github.com/shawn135/cloud-web-server-automation.git
+## 🚀 Features
+
+- **Terraform** provisions:
+  - EC2 instance
+  - Security groups
+  - Key pair
+
+- **Ansible** configures:
+  - Installs NGINX, MySQL, PHP
+  - Replaces default index page
+  - Hardens SSH config
+
+- **GitHub Actions** handles:
+  - CI/CD on push
+  - Optional test validation with `curl`
+  - Seamless deploy pipeline
+
+---
+
+## 📁 Folder Structure
+
+├── .github/workflows/
+│ ├── deploy.yml # CI/CD pipeline
+│ └── test.yml # Optional test validation
+├── ansible/
+│ └── setup-nginx.yml # Ansible playbook
+├── terraform/
+│ └── main.tf # Infrastructure definition
+├── setup.sh # Local bootstrap script
+├── test.php # PHP info page (optional)
+└── README.md
+
+
+---
+
+## 🛠️ How to Use
+
+### ✅ Prerequisites
+
+- AWS account & credentials
+- Terraform installed
+- SSH private key (e.g., `key.pem`)
+- GitHub Actions secrets:
+  - `AWS_ACCESS_KEY_ID`
+  - `AWS_SECRET_ACCESS_KEY`
+
+---
+
+### 1. Clone the Repo
+
+```bash
+git clone https://github.com/your-username/cloud-web-server-automation.git
 cd cloud-web-server-automation
 
-Create config.ini with your settings:DOMAIN=example.com
-PHP_VERSION=8.1
+Deploy Infrastructure
+cd terraform
+terraform init
+terraform apply
 
-Run the script:sudo bash setup.sh
+ansible-playbook -i <your-ec2-ip>, ansible/setup-nginx.yml --user ubuntu --private-key your-key.pem
 
-Verify setup by accessing http://<your-domain>/test.php.
+👨‍💻 Author
+Shawn [@shawn135]
 
-Features
+Cloud Engineer • Bartender • Fitness Nerd
+Building beautiful infra with scripts and swagger.
 
-Modular Bash script with error handling and logging
-Configurable via config.ini for flexibility
-Automated SSL setup with Let’s Encrypt
-Firewall configuration with UFW
-CI/CD pipeline with GitHub Actions for automated testing
+🧠 Notes
+SSH root login is disabled for security
 
-Project Structure
+Terraform state is stored locally
 
-setup.sh: Main automation script
-config.ini: Configuration file for customizable settings
-.github/workflows/test.yml: GitHub Actions workflow for CI/CD
+NGINX and PHP services are auto-started
 
-Notes
+Use setup.sh for manual local installs
 
-Logs are written to /var/log/web-server-setup.log.
-Ensure port 443 is open for SSL.
-
-lets go
-Triggering CI/CD pipeline
