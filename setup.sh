@@ -58,4 +58,7 @@ echo "<?php phpinfo(); ?>" > /var/www/html/test.php
 chown www-data:www-data /var/www/html/test.php
 chmod 644 /var/www/html/test.php
 
+echo "<?php phpinfo(); ?>" > /var/www/html/test.php
+
+
 log "Setup completed successfully"
