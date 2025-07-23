@@ -28,3 +28,4 @@ jobs:
       - name: Run setup script on EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i shawn-key.pem ubuntu@54.82.93.197 'chmod +x ~/setup.sh && sudo bash ~/setup.sh'
+#
