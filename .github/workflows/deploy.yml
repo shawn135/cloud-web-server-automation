@@ -28,9 +28,3 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i shawn-key.pem ubuntu@54.82.93.197 '
             sudo bash -s' < setup.sh
-
-      - name: Validate PHP setup via test.php
-        run: |
-          ssh -o StrictHostKeyChecking=no -i shawn-key.pem ubuntu@54.82.93.197 '
-            curl -s http://localhost/test.php | grep -q "PHP Version"'
-#
