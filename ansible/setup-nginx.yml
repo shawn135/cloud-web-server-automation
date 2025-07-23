@@ -1,41 +1,25 @@
 ---
-- name: Configure Nginx and PHP-FPM on EC2
+- name: Configure Nginx on EC2
   hosts: webservers
   become: yes
-
-  vars:
-    php_fpm_sock: "/run/php/php-fpm.sock"
-    # If your system uses a versioned socket (like php8.1-fpm.sock), auto-detect with a shell command or adjust this variable.
 
   tasks:
     - name: Update package cache
       apt:
         update_cache: yes
+      when: ansible_os_family == "Debian"
 
-    - name: Install NGINX and PHP-FPM
+    - name: Install NGINX
       apt:
-        name:
-          - nginx
-          - php-fpm
+        name: nginx
         state: present
+      notify: Restart Nginx
 
-    - name: Start and enable Nginx
+    - name: Start Nginx
       service:
         name: nginx
         state: started
         enabled: yes
-
-    - name: Start and enable PHP-FPM
-      service:
-        name: "{{ lookup('ansible.builtin.service_facts').services | dict2items | selectattr('key','match','php.*-fpm') | map(attribute='key') | list | first | default('php8.1-fpm') }}"
-        state: started
-        enabled: yes
-
-    - name: Copy test.php to Nginx web root
-      copy:
-        src: ansible/test.php
-        dest: /var/www/html/test.php
-        mode: '0644'
 
     - name: Replace default index.html
       copy:
@@ -46,29 +30,6 @@
           <body><h1>Hello from Ansible Automation!</h1></body>
           </html>
 
-    - name: Ensure index.php is in the index line
-      lineinfile:
-        path: /etc/nginx/sites-available/default
-        regexp: '^(\s*)index\s+'
-        line: '        index index.php index.html index.htm index.nginx-debian.html;'
-        backrefs: yes
-
-    - name: Ensure PHP location block exists
-      blockinfile:
-        path: /etc/nginx/sites-available/default
-        marker: "# {mark} ANSIBLE MANAGED PHP BLOCK"
-        insertafter: '^(\s*)index.+;$'
-        block: |
-          location ~ \.php$ {
-              include snippets/fastcgi-php.conf;
-              fastcgi_pass unix:{{ php_fpm_sock }};
-          }
-
-    - name: Reload Nginx to apply config changes
-      service:
-        name: nginx
-        state: reloaded
-
     - name: Harden SSH configuration
       lineinfile:
         path: /etc/ssh/sshd_config
@@ -77,7 +38,18 @@
       notify: Restart SSH
 
   handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
+
     - name: Restart SSH
       service:
         name: ssh
         state: restarted
+
+- name: Copy test.php to Nginx web root
+  copy:
+    src: test.php
+    dest: /var/www/html/test.php
+    mode: '0644'
