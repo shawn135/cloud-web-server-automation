@@ -4,21 +4,20 @@
   become: yes
 
   vars:
-    php_fpm_package: php-fpm
+    php_fpm_sock: "/run/php/php-fpm.sock"
+    # If your system uses a versioned socket (like php8.1-fpm.sock), auto-detect with a shell command or adjust this variable.
 
   tasks:
     - name: Update package cache
       apt:
         update_cache: yes
-      when: ansible_os_family == "Debian"
 
     - name: Install NGINX and PHP-FPM
       apt:
         name:
           - nginx
-          - "{{ php_fpm_package }}"
+          - php-fpm
         state: present
-      notify: Restart Nginx
 
     - name: Start and enable Nginx
       service:
@@ -26,9 +25,15 @@
         state: started
         enabled: yes
 
+    - name: Start and enable PHP-FPM
+      service:
+        name: "{{ lookup('ansible.builtin.service_facts').services | dict2items | selectattr('key','match','php.*-fpm') | map(attribute='key') | list | first | default('php8.1-fpm') }}"
+        state: started
+        enabled: yes
+
     - name: Copy test.php to Nginx web root
       copy:
-        src: ansible/test.php   # adjust if your ansible directory path differs
+        src: ansible/test.php
         dest: /var/www/html/test.php
         mode: '0644'
 
@@ -41,34 +46,28 @@
           <body><h1>Hello from Ansible Automation!</h1></body>
           </html>
 
-    - name: Ensure Nginx config supports PHP
-      blockinfile:
+    - name: Ensure index.php is in the index line
+      lineinfile:
         path: /etc/nginx/sites-available/default
-        marker: "# {mark} ANSIBLE MANAGED PHP BLOCK"
-        insertafter: '^(\s*)index\s+'
-        block: |
-          index index.php index.html index.htm index.nginx-debian.html;
-      notify: Reload Nginx
+        regexp: '^(\s*)index\s+'
+        line: '        index index.php index.html index.htm index.nginx-debian.html;'
+        backrefs: yes
 
     - name: Ensure PHP location block exists
       blockinfile:
         path: /etc/nginx/sites-available/default
-        marker: "# {mark} ANSIBLE MANAGED PHP LOCATION"
+        marker: "# {mark} ANSIBLE MANAGED PHP BLOCK"
+        insertafter: '^(\s*)index.+;$'
         block: |
           location ~ \.php$ {
               include snippets/fastcgi-php.conf;
-              fastcgi_pass unix:/var/run/php/php-fpm.sock;
+              fastcgi_pass unix:{{ php_fpm_sock }};
           }
-          location ~ /\.ht {
-              deny all;
-          }
-      notify: Reload Nginx
 
-    - name: Start and enable PHP-FPM
+    - name: Reload Nginx to apply config changes
       service:
-        name: "{{ lookup('ansible.builtin.service_facts').services | dict2items | selectattr('key','match','php.*-fpm') | map(attribute='key') | list | first | default('php7.4-fpm') }}"
-        state: started
-        enabled: yes
+        name: nginx
+        state: reloaded
 
     - name: Harden SSH configuration
       lineinfile:
@@ -78,16 +77,6 @@
       notify: Restart SSH
 
   handlers:
-    - name: Restart Nginx
-      service:
-        name: nginx
-        state: restarted
-
-    - name: Reload Nginx
-      service:
-        name: nginx
-        state: reloaded
-
     - name: Restart SSH
       service:
         name: ssh
