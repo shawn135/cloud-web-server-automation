@@ -1,24 +1,35 @@
-name: Deploy Nginx with Ansible
+name: Deploy Web Server
 
 on:
   push:
     branches:
       - main
+    paths:
+      - '**.yml'
+      - '**.sh'
+      - '**.php'
+      - '**.tf'
+      - '**.txt'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Setup SSH key
-      uses: webfactory/ssh-agent@v0.5.4
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Set up SSH private key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > shawn-key.pem
+          chmod 600 shawn-key.pem
 
+      - name: Run setup script on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i shawn-key.pem ubuntu@54.82.93.197 '
+            sudo bash -s' < setup.sh
 
-    - name: Run Ansible Playbook
-      run: |
-            ansible-playbook -i "${{ secrets.EC2_HOST }}," ansible/setup-nginx.yml -u ubuntu --ssh-extra-args "-o StrictHostKeyChecking=no"
+      - name: Validate PHP setup via test.php
+        run: |
+          ssh -o StrictHostKeyChecking=no -i shawn-key.pem ubuntu@54.82.93.197 '
+            curl -s http://localhost/test.php | grep -q "PHP Version"'
