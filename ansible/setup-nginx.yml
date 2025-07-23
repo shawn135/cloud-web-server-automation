@@ -9,60 +9,17 @@
         update_cache: yes
       when: ansible_os_family == "Debian"
 
-    - name: Install NGINX and PHP-FPM
+    - name: Install NGINX
       apt:
-        name: 
-          - nginx
-          - php-fpm
-          - php-mysql
+        name: nginx
         state: present
-      notify: 
-        - Restart Nginx
-        - Restart PHP-FPM
+      notify: Restart Nginx
 
-    - name: Start and enable Nginx
+    - name: Start Nginx
       service:
         name: nginx
         state: started
         enabled: yes
-
-    - name: Start and enable PHP-FPM
-      service:
-        name: php8.1-fpm  # Adjust version as needed
-        state: started
-        enabled: yes
-
-    - name: Configure Nginx default site for PHP
-      copy:
-        dest: /etc/nginx/sites-available/default
-        content: |
-          server {
-              listen 80 default_server;
-              listen [::]:80 default_server;
-
-              root /var/www/html;
-              index index.php index.html index.htm index.nginx-debian.html;
-
-              server_name _;
-
-              location / {
-                  try_files $uri $uri/ =404;
-              }
-
-              location ~ \.php$ {
-                  include snippets/fastcgi-php.conf;
-                  fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
-              }
-
-              location ~ /\.ht {
-                  deny all;
-              }
-          }
-      notify: Restart Nginx
-
-    - name: Test Nginx configuration
-      command: nginx -t
-      changed_when: false
 
     - name: Replace default index.html
       copy:
@@ -78,8 +35,6 @@
         src: test.php
         dest: /var/www/html/test.php
         mode: '0644'
-        owner: www-data
-        group: www-data
 
     - name: Harden SSH configuration
       lineinfile:
@@ -92,11 +47,6 @@
     - name: Restart Nginx
       service:
         name: nginx
-        state: restarted
-
-    - name: Restart PHP-FPM
-      service:
-        name: php8.1-fpm
         state: restarted
 
     - name: Restart SSH
