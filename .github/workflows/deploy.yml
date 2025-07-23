@@ -28,3 +28,6 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i shawn-key.pem ubuntu@54.82.93.197 '
             sudo bash -s' < setup.sh
+
+      - name: Confirm deployment finished
+        run: echo "✅ EC2 instance successfully configured via Ansible & setup.sh"
