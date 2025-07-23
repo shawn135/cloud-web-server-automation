@@ -1,7 +1,10 @@
 ---
-- name: Configure Nginx on EC2
+- name: Configure Nginx and PHP-FPM on EC2
   hosts: webservers
   become: yes
+
+  vars:
+    php_fpm_package: php-fpm
 
   tasks:
     - name: Update package cache
@@ -9,17 +12,25 @@
         update_cache: yes
       when: ansible_os_family == "Debian"
 
-    - name: Install NGINX
+    - name: Install NGINX and PHP-FPM
       apt:
-        name: nginx
+        name:
+          - nginx
+          - "{{ php_fpm_package }}"
         state: present
       notify: Restart Nginx
 
-    - name: Start Nginx
+    - name: Start and enable Nginx
       service:
         name: nginx
         state: started
         enabled: yes
+
+    - name: Copy test.php to Nginx web root
+      copy:
+        src: ansible/test.php   # adjust if your ansible directory path differs
+        dest: /var/www/html/test.php
+        mode: '0644'
 
     - name: Replace default index.html
       copy:
@@ -30,11 +41,34 @@
           <body><h1>Hello from Ansible Automation!</h1></body>
           </html>
 
-    - name: Copy test.php to Nginx web root
-      copy:
-        src: test.php
-        dest: /var/www/html/test.php
-        mode: '0644'
+    - name: Ensure Nginx config supports PHP
+      blockinfile:
+        path: /etc/nginx/sites-available/default
+        marker: "# {mark} ANSIBLE MANAGED PHP BLOCK"
+        insertafter: '^(\s*)index\s+'
+        block: |
+          index index.php index.html index.htm index.nginx-debian.html;
+      notify: Reload Nginx
+
+    - name: Ensure PHP location block exists
+      blockinfile:
+        path: /etc/nginx/sites-available/default
+        marker: "# {mark} ANSIBLE MANAGED PHP LOCATION"
+        block: |
+          location ~ \.php$ {
+              include snippets/fastcgi-php.conf;
+              fastcgi_pass unix:/var/run/php/php-fpm.sock;
+          }
+          location ~ /\.ht {
+              deny all;
+          }
+      notify: Reload Nginx
+
+    - name: Start and enable PHP-FPM
+      service:
+        name: "{{ lookup('ansible.builtin.service_facts').services | dict2items | selectattr('key','match','php.*-fpm') | map(attribute='key') | list | first | default('php7.4-fpm') }}"
+        state: started
+        enabled: yes
 
     - name: Harden SSH configuration
       lineinfile:
@@ -48,6 +82,11 @@
       service:
         name: nginx
         state: restarted
+
+    - name: Reload Nginx
+      service:
+        name: nginx
+        state: reloaded
 
     - name: Restart SSH
       service:
