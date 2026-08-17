@@ -1,88 +1,92 @@
-# ☁️ Cloud Web Server Automation
+# AWS Cloud Web Server Automation
 
-This project automates the deployment of a fully functional LAMP-style web server (Nginx, MySQL, PHP) on an AWS EC2 instance using **Terraform** and **Ansible**, with **GitHub Actions** providing full CI/CD integration. 
+Automated deployment and configuration of an AWS web server using
+Terraform, Ansible, and GitHub Actions.
 
-Problem
-Manually provisioning and configuring web servers is slow and error-prone.
+## Overview
 
-Solution
-Built an automated AWS deployment pipeline using Terraform, Ansible and GitHub Actions.
+This project demonstrates Infrastructure as Code and automated
+configuration management by provisioning an AWS EC2 web server
+and deploying a NGINX/PHP/MySQL application stack.
 
----
+The entire deployment process can be automated through GitHub Actions.
 
-## 🚀 Features
+## Architecture
 
-- **Terraform** provisions:
-  - EC2 instance
-  - Security groups
-  - Key pair
+GitHub
+   ↓
+GitHub Actions
+   ↓
+Terraform
+   ↓
+AWS EC2
+   ↓
+Ansible
+   ↓
+NGINX + PHP + MySQL
 
-- **Ansible** configures:
-  - Installs NGINX, MySQL, PHP
-  - Replaces default index page
-  - Hardens SSH config
+## Technologies
 
-- **GitHub Actions** handles:
-  - CI/CD on push
-  - Optional test validation with `curl`
-  - Seamless deploy pipeline
+- AWS EC2
+- Terraform
+- Ansible
+- GitHub Actions
+- NGINX
+- PHP
+- MySQL
+- Linux
+- Bash
 
----
+## What I Built
 
-## 📁 Folder Structure
+### Infrastructure
 
-├── .github/workflows/
-│ ├── deploy.yml # CI/CD pipeline
-│ └── test.yml # Optional test validation
-├── ansible/
-│ └── setup-nginx.yml # Ansible playbook
-├── terraform/
-│ └── main.tf # Infrastructure definition
-├── setup.sh # Local bootstrap script
-├── test.php # PHP info page (optional)
-└── README.md
+Terraform provisions:
 
+- EC2 instance
+- Security group
+- SSH key configuration
 
----
+### Configuration Management
 
-## 🛠️ How to Use
+Ansible automatically:
 
-### ✅ Prerequisites
+- Installs NGINX
+- Installs PHP
+- Installs MySQL
+- Configures the web server
+- Deploys the application
+- Applies SSH hardening
 
-- AWS account & credentials
-- Terraform installed
-- SSH private key (e.g., `key.pem`)
-- GitHub Actions secrets:
-  - `AWS_ACCESS_KEY_ID`
-  - `AWS_SECRET_ACCESS_KEY`
+### CI/CD
 
----
+GitHub Actions automates:
 
-### 1. Clone the Repo
+- Infrastructure deployment
+- Configuration
+- Deployment validation
+- HTTP testing
 
-```bash
-git clone https://github.com/your-username/cloud-web-server-automation.git
-cd cloud-web-server-automation
+## Engineering Practices
 
-Deploy Infrastructure
-cd terraform
-terraform init
-terraform apply
+- Infrastructure as Code
+- Automated configuration management
+- CI/CD
+- SSH hardening
+- Automated deployment validation
+- Separation of infrastructure and configuration
 
-ansible-playbook -i <your-ec2-ip>, ansible/setup-nginx.yml --user ubuntu --private-key your-key.pem
+Lessons Learned
 
-👨‍💻 Author
-Shawn [@shawn135]
+This project helped me understand how Terraform,
+Ansible, and CI/CD tools can work together to automate
+cloud infrastructure rather than manually configuring
+servers.
 
-Cloud Engineer • Bartender • Fitness Nerd
-Building beautiful infra with scripts and swagger.
-
-🧠 Notes
-SSH root login is disabled for security
-
-Terraform state is stored locally
-
-NGINX and PHP services are auto-started
-
-Use setup.sh for manual local installs
-
+Future Improvements
+Replace static infrastructure with a VPC architecture
+Add load balancing
+Add Auto Scaling
+Add CloudWatch monitoring
+Use AWS Secrets Manager
+Implement remote Terraform state
