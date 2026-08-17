@@ -1,6 +1,12 @@
 # ☁️ Cloud Web Server Automation
 
-This project automates the deployment of a fully functional LAMP-style web server (Nginx, MySQL, PHP) on an AWS EC2 instance using **Terraform** and **Ansible**, with **GitHub Actions** providing full CI/CD integration.
+This project automates the deployment of a fully functional LAMP-style web server (Nginx, MySQL, PHP) on an AWS EC2 instance using **Terraform** and **Ansible**, with **GitHub Actions** providing full CI/CD integration. 
+
+Problem
+Manually provisioning and configuring web servers is slow and error-prone.
+
+Solution
+Built an automated AWS deployment pipeline using Terraform, Ansible and GitHub Actions.
 
 ---
 
